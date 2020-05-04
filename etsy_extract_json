@@ -1,0 +1,39 @@
+import urllib.request, urllib.parse, urllib.error
+import json
+import ssl
+
+# request form: https://openapi.etsy.com/v2/listings/active?api_key={YOUR_API_KEY}
+
+api_key = ''
+serviceurl = 'https://openapi.etsy.com/v2/listings/active?'
+
+# Ignore SSL certificate errors
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
+while True:
+    address = input('Enter location: ')
+    if len(address) < 1: break
+    parms = dict()
+    parms['address'] = address
+    if api_key is not False: parms['key'] = api_key
+    print('dict parms: ', parms)
+    url = serviceurl + urllib.parse.urlencode(parms)
+    print('url: ', url)
+    print('Retrieving', url)
+    uh = urllib.request.urlopen(url, context=ctx)
+    data = uh.read().decode()
+    print('Retrieved', len(data), 'characters')
+
+    try:
+        js = json.loads(data)
+    except:
+        js = None
+
+    if not js:
+        print('==== Failure To Retrieve ====')
+        print(data)
+        break
+
+    print(json.dumps(js, indent=4))
